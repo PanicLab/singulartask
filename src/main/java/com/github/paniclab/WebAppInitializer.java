@@ -1,11 +1,8 @@
 package com.github.paniclab;
 
 import com.github.paniclab.config.ApplicationConfig;
-import com.github.paniclab.config.WebConfig;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.spring.server.SpringVaadinServlet;
+import com.github.paniclab.config.VaadinConfig;
 import org.springframework.web.WebApplicationInitializer;
-import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import javax.servlet.ServletContext;
@@ -18,15 +15,17 @@ public class WebAppInitializer implements WebApplicationInitializer {
     public void onStartup(ServletContext servletContext) throws ServletException {
         AnnotationConfigWebApplicationContext appContext = new AnnotationConfigWebApplicationContext();
         appContext.register(ApplicationConfig.class);
+        appContext.scan(WebAppInitializer.class.getPackage().getName());
 
         //servletContext.addListener(new ContextLoaderListener(appContext));
 
         AnnotationConfigWebApplicationContext webContext = new AnnotationConfigWebApplicationContext();
         webContext.setParent(appContext);
-        webContext.register(WebConfig.class);
+        webContext.register(VaadinConfig.class);
+        webContext.scan(WebAppInitializer.class.getPackage().getName());
 
-        ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadinServlet", SpringVaadinServlet.class);
+        ServletRegistration.Dynamic vaadin = servletContext.addServlet("vaadinServlet", VaadinConfig.class);
         vaadin.setLoadOnStartup(1);
-        vaadin.addMapping("/");
+        vaadin.addMapping("/*");
     }
 }
